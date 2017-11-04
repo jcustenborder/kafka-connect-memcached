@@ -22,19 +22,3 @@ The Memcached Connector provides a Kafka Connect :term:`Sink Connector` that can
     sinks/*
 
 
-.. toctree::
-    :maxdepth: 1
-    :caption: Transformations:
-    :hidden:
-    :glob:
-
-    transformations/*
-
-
-.. toctree::
-    :maxdepth: 0
-    :caption: Schemas:
-    :hidden:
-
-    schemas
-
