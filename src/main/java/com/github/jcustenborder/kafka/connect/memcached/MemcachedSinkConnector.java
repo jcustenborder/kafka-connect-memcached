@@ -17,6 +17,7 @@ package com.github.jcustenborder.kafka.connect.memcached;
 
 import com.github.jcustenborder.kafka.connect.utils.VersionUtil;
 import com.github.jcustenborder.kafka.connect.utils.config.Description;
+import com.github.jcustenborder.kafka.connect.utils.config.DocumentationNote;
 import com.github.jcustenborder.kafka.connect.utils.config.Title;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.connect.connector.Task;
@@ -29,6 +30,9 @@ import java.util.Map;
 @Title("Memcached Sink")
 @Description("The Memcached Sink provides a :term:`Sink Connector` that can write data in real time to a memcached " +
     "environment.")
+@DocumentationNote("This connector expects that the key will be a string and the value will be a byte representation of " +
+    "the message. Your data might not be formatted like this. Take a look at transformations to apply the convert the " +
+    "data to the proper format.")
 public class MemcachedSinkConnector extends SourceConnector {
   @Override
   public String version() {
