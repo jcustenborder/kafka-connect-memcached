@@ -21,7 +21,7 @@ import com.github.jcustenborder.kafka.connect.utils.config.DocumentationNote;
 import com.github.jcustenborder.kafka.connect.utils.config.Title;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.connect.connector.Task;
-import org.apache.kafka.connect.source.SourceConnector;
+import org.apache.kafka.connect.sink.SinkConnector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,7 @@ import java.util.Map;
 @DocumentationNote("This connector expects that the key will be a string and the value will be a byte representation of " +
     "the message. Your data might not be formatted like this. Take a look at transformations to apply the convert the " +
     "data to the proper format.")
-public class MemcachedSinkConnector extends SourceConnector {
+public class MemcachedSinkConnector extends SinkConnector {
   @Override
   public String version() {
     return VersionUtil.version(this.getClass());
