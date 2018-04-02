@@ -15,9 +15,11 @@
  */
 package com.github.jcustenborder.kafka.connect.memcached;
 
+import com.github.jcustenborder.kafka.connect.utils.config.ConfigKeyBuilder;
 import com.github.jcustenborder.kafka.connect.utils.config.ConfigUtils;
 import com.github.jcustenborder.kafka.connect.utils.config.ValidEnum;
 import com.github.jcustenborder.kafka.connect.utils.config.ValidHostnameAndPort;
+import com.google.common.base.Preconditions;
 import net.spy.memcached.ConnectionFactoryBuilder;
 import net.spy.memcached.FailureMode;
 import org.apache.kafka.common.config.AbstractConfig;
@@ -25,8 +27,11 @@ import org.apache.kafka.common.config.ConfigDef;
 
 import java.net.InetSocketAddress;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 class MemcachedSinkConnectorConfig extends AbstractConfig {
 
@@ -127,18 +132,147 @@ class MemcachedSinkConnectorConfig extends AbstractConfig {
     this.opTimeout = getLong(OP_TIME_TIMEOUT_CONF);
   }
 
+  static class EnumRecommender implements ConfigDef.Recommender {
+    final Set<String> validEnums;
+    final Class<?> enumClass;
+
+    public static EnumRecommender of(Class<?> enumClass, String... excludes) {
+      return new EnumRecommender(enumClass, excludes);
+    }
+
+    private EnumRecommender(Class<?> enumClass, String... excludes) {
+      Preconditions.checkNotNull(enumClass, "enumClass cannot be null");
+      Preconditions.checkState(enumClass.isEnum(), "enumClass must be an enum.");
+      Set<String> validEnums = new LinkedHashSet();
+      Object[] var4 = enumClass.getEnumConstants();
+      int var5 = var4.length;
+
+      for (int var6 = 0; var6 < var5; ++var6) {
+        Object o = var4[var6];
+        String key = o.toString();
+        validEnums.add(key);
+      }
+
+      validEnums.removeAll(Arrays.asList(excludes));
+      this.validEnums = validEnums;
+      this.enumClass = enumClass;
+    }
+
+    @Override
+    public List<Object> validValues(String s, Map<String, Object> map) {
+      return this.validEnums.stream().collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean visible(String s, Map<String, Object> map) {
+      return true;
+    }
+  }
+
+  static final String GROUP_CONNNECTION = "Connection";
 
   static ConfigDef config() {
     return new ConfigDef()
-        .define(HOSTS_CONF, ConfigDef.Type.LIST, HOSTS_DEFAULT, ValidHostnameAndPort.of(), ConfigDef.Importance.HIGH, HOSTS_DOC)
-        .define(PROTOCOL_CONF, ConfigDef.Type.STRING, PROTOCOL_DEFAULT, ValidEnum.of(ConnectionFactoryBuilder.Protocol.class), ConfigDef.Importance.LOW, PROTOCOL_DOC)
-        .define(FAILURE_MODE_CONF, ConfigDef.Type.STRING, FAILURE_MODE_DEFAULT, ValidEnum.of(FailureMode.class), ConfigDef.Importance.LOW, FAILURE_MODE_DOC)
-        .define(NAGLE_ALGORITHM_ENABLED_CONF, ConfigDef.Type.BOOLEAN, NAGLE_ALGORITHM_ENABLED_DEFAULT, ConfigDef.Importance.LOW, NAGLE_ALGORITHM_ENABLED_DOC)
-        .define(OPTIMIZE_ENABLED_CONF, ConfigDef.Type.BOOLEAN, OPTIMIZE_ENABLED_DEFAULT, ConfigDef.Importance.LOW, OPTIMIZE_ENABLED_DOC)
-        .define(RECONNECT_DELAY_MAX_CONF, ConfigDef.Type.LONG, RECONNECT_DELAY_MAX_DEFAULT, ConfigDef.Range.atLeast(1), ConfigDef.Importance.LOW, RECONNECT_DELAY_MAX_DOC)
-        .define(OP_TIME_TIMEOUT_CONF, ConfigDef.Type.LONG, OP_TIME_TIMEOUT_DEFAULT, ConfigDef.Range.atLeast(-1), ConfigDef.Importance.LOW, OP_TIME_TIMEOUT_DOC)
-        .define(LOCATOR_TYPE_CONF, ConfigDef.Type.STRING, LOCATOR_TYPE_DEFAULT, ValidEnum.of(ConnectionFactoryBuilder.Locator.class), ConfigDef.Importance.LOW, LOCATOR_TYPE_DOC)
-        .define(READ_BUFFER_SIZE_BYTES_CONF, ConfigDef.Type.INT, READ_BUFFER_SIZE_BYTES_DEFAULT, ConfigDef.Range.atLeast(-1), ConfigDef.Importance.LOW, READ_BUFFER_SIZE_BYTES_DOC)
-        .define(DEFAULT_EXPIRATION_SECS_CONF, ConfigDef.Type.INT, DEFAULT_EXPIRATION_SECS_DEFAULT, ConfigDef.Range.atLeast(0), ConfigDef.Importance.LOW, DEFAULT_EXPIRATION_SECS_DOC);
+        .define(
+            ConfigKeyBuilder.of(HOSTS_CONF, ConfigDef.Type.LIST)
+                .group(GROUP_CONNNECTION)
+                .displayName("Hosts")
+                .defaultValue(HOSTS_DEFAULT)
+                .validator(ValidHostnameAndPort.of())
+                .importance(ConfigDef.Importance.HIGH)
+                .documentation(HOSTS_DOC)
+                .build()
+        )
+        .define(
+            ConfigKeyBuilder.of(PROTOCOL_CONF, ConfigDef.Type.STRING)
+                .group(GROUP_CONNNECTION)
+                .displayName("Protocol")
+                .defaultValue(PROTOCOL_DEFAULT)
+                .validator(ValidEnum.of(ConnectionFactoryBuilder.Protocol.class))
+                .importance(ConfigDef.Importance.LOW)
+                .documentation(PROTOCOL_DOC)
+                .recommender(EnumRecommender.of(ConnectionFactoryBuilder.Protocol.class))
+                .build()
+        )
+        .define(
+            ConfigKeyBuilder.of(FAILURE_MODE_CONF, ConfigDef.Type.STRING)
+                .group(GROUP_CONNNECTION)
+                .displayName("Failure mode")
+                .defaultValue(FAILURE_MODE_DEFAULT)
+                .validator(ValidEnum.of(FailureMode.class))
+                .importance(ConfigDef.Importance.LOW)
+                .documentation(FAILURE_MODE_DOC)
+                .recommender(EnumRecommender.of(FailureMode.class))
+                .build()
+        )
+        .define(
+            ConfigKeyBuilder.of(NAGLE_ALGORITHM_ENABLED_CONF, ConfigDef.Type.BOOLEAN)
+                .group(GROUP_CONNNECTION)
+                .displayName("Nagle algorithm")
+                .defaultValue(NAGLE_ALGORITHM_ENABLED_DEFAULT)
+                .importance(ConfigDef.Importance.LOW)
+                .documentation(NAGLE_ALGORITHM_ENABLED_DOC)
+                .build()
+        )
+        .define(
+            ConfigKeyBuilder.of(OPTIMIZE_ENABLED_CONF, ConfigDef.Type.BOOLEAN)
+                .group(GROUP_CONNNECTION)
+                .displayName("Optimize")
+                .defaultValue(OPTIMIZE_ENABLED_DEFAULT)
+                .importance(ConfigDef.Importance.LOW)
+                .documentation(OPTIMIZE_ENABLED_DOC)
+                .build()
+        )
+        .define(
+            ConfigKeyBuilder.of(RECONNECT_DELAY_MAX_CONF, ConfigDef.Type.LONG)
+                .group(GROUP_CONNNECTION)
+                .displayName("Reconnect delay")
+                .defaultValue(RECONNECT_DELAY_MAX_DEFAULT)
+                .importance(ConfigDef.Importance.LOW)
+                .documentation(RECONNECT_DELAY_MAX_DOC)
+                .validator(ConfigDef.Range.atLeast(1))
+                .build()
+        )
+        .define(
+            ConfigKeyBuilder.of(OP_TIME_TIMEOUT_CONF, ConfigDef.Type.LONG)
+                .group(GROUP_CONNNECTION)
+                .displayName("Operation timeout")
+                .defaultValue(OP_TIME_TIMEOUT_DEFAULT)
+                .importance(ConfigDef.Importance.LOW)
+                .documentation(OP_TIME_TIMEOUT_DOC)
+                .validator(ConfigDef.Range.atLeast(-1))
+                .build()
+        )
+        .define(
+            ConfigKeyBuilder.of(LOCATOR_TYPE_CONF, ConfigDef.Type.STRING)
+                .group(GROUP_CONNNECTION)
+                .displayName("Locator type")
+                .defaultValue(LOCATOR_TYPE_DEFAULT)
+                .validator(ValidEnum.of(ConnectionFactoryBuilder.Locator.class))
+                .importance(ConfigDef.Importance.LOW)
+                .documentation(LOCATOR_TYPE_DOC)
+                .recommender(EnumRecommender.of(ConnectionFactoryBuilder.Locator.class))
+                .build()
+        )
+        .define(
+            ConfigKeyBuilder.of(READ_BUFFER_SIZE_BYTES_CONF, ConfigDef.Type.INT)
+                .group(GROUP_CONNNECTION)
+                .displayName("Read buffer size")
+                .defaultValue(READ_BUFFER_SIZE_BYTES_DEFAULT)
+                .validator(ConfigDef.Range.atLeast(-1))
+                .importance(ConfigDef.Importance.LOW)
+                .documentation(READ_BUFFER_SIZE_BYTES_DOC)
+                .build()
+        )
+        .define(
+            ConfigKeyBuilder.of(DEFAULT_EXPIRATION_SECS_CONF, ConfigDef.Type.INT)
+                .group(GROUP_CONNNECTION)
+                .displayName("Default expiration")
+                .defaultValue(DEFAULT_EXPIRATION_SECS_DEFAULT)
+                .validator(ConfigDef.Range.atLeast(-1))
+                .importance(ConfigDef.Importance.LOW)
+                .documentation(DEFAULT_EXPIRATION_SECS_DOC)
+                .build()
+        );
   }
 }
