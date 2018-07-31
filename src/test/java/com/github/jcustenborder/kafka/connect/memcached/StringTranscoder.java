@@ -17,25 +17,29 @@ package com.github.jcustenborder.kafka.connect.memcached;
 
 import net.spy.memcached.CachedData;
 import net.spy.memcached.transcoders.Transcoder;
+import org.apache.commons.io.Charsets;
 
-class ByteArrayTranscoder implements Transcoder<byte[]> {
-  public static final Transcoder<byte[]> INSTANCE = new ByteArrayTranscoder();
+class StringTranscoder implements Transcoder<String> {
+  public static final Transcoder<String> INSTANCE = new StringTranscoder();
+
+  private StringTranscoder() {
+  }
 
   @Override
   public boolean asyncDecode(CachedData cachedData) {
-    return false;
+    return true;
   }
 
   @Override
-  public CachedData encode(byte[] input) {
-    return new CachedData(0, input, CachedData.MAX_SIZE);
+  public CachedData encode(String s) {
+    final byte[] buffer = s.getBytes(Charsets.UTF_8);
+    return new CachedData(0, buffer, CachedData.MAX_SIZE);
   }
 
   @Override
-  public byte[] decode(CachedData cachedData) {
-    return cachedData.getData();
+  public String decode(CachedData cachedData) {
+    return new String(cachedData.getData(), Charsets.UTF_8);
   }
-
 
   @Override
   public int getMaxSize() {
