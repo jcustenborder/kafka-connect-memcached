@@ -18,12 +18,12 @@ package com.github.jcustenborder.kafka.connect.memcached;
 import com.github.jcustenborder.kafka.connect.utils.VersionUtil;
 import com.github.jcustenborder.kafka.connect.utils.config.Description;
 import com.github.jcustenborder.kafka.connect.utils.config.DocumentationNote;
+import com.github.jcustenborder.kafka.connect.utils.config.TaskConfigs;
 import com.github.jcustenborder.kafka.connect.utils.config.Title;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.connect.connector.Task;
 import org.apache.kafka.connect.sink.SinkConnector;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -50,16 +50,12 @@ public class MemcachedSinkConnector extends SinkConnector {
 
   @Override
   public Class<? extends Task> taskClass() {
-    return MemcachedSinkConnectorTask.class;
+    return MemcachedSinkTask.class;
   }
 
   @Override
   public List<Map<String, String>> taskConfigs(int taskCount) {
-    List<Map<String, String>> taskConfigs = new ArrayList<>();
-    for (int i = 0; i < taskCount; i++) {
-      taskConfigs.add(this.settings);
-    }
-    return taskConfigs;
+    return TaskConfigs.multiple(this.settings, taskCount);
   }
 
   @Override

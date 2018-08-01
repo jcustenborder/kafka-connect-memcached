@@ -31,6 +31,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 class MemcachedSinkConnectorConfig extends AbstractConfig {
@@ -73,7 +74,7 @@ class MemcachedSinkConnectorConfig extends AbstractConfig {
 
   public static final String OP_TIME_TIMEOUT_CONF = "memcached.op.time.timeout.msecs";
   static final String OP_TIME_TIMEOUT_DOC = "The default operation timeout in milliseconds.";
-  static final Long OP_TIME_TIMEOUT_DEFAULT = -1L;
+  static final Long OP_TIME_TIMEOUT_DEFAULT = TimeUnit.SECONDS.toMillis(30);
 
   public static final String OPTIMIZE_ENABLED_CONF = "memcached.optimize.enable";
   static final String OPTIMIZE_ENABLED_DOC = "Set to false if the default operation optimization is not desirable.";
@@ -269,7 +270,7 @@ class MemcachedSinkConnectorConfig extends AbstractConfig {
                 .group(GROUP_CONNNECTION)
                 .displayName("Default expiration")
                 .defaultValue(DEFAULT_EXPIRATION_SECS_DEFAULT)
-                .validator(ConfigDef.Range.atLeast(-1))
+                .validator(ConfigDef.Range.atLeast(0))
                 .importance(ConfigDef.Importance.LOW)
                 .documentation(DEFAULT_EXPIRATION_SECS_DOC)
                 .build()
