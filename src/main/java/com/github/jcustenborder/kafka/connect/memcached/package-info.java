@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 @Introduction("The memcached plugin is a mechanism for writing data to a memcached cluster.")
+@Title("Memcached")
 package com.github.jcustenborder.kafka.connect.memcached;
 
 import com.github.jcustenborder.kafka.connect.utils.config.Introduction;
+import com.github.jcustenborder.kafka.connect.utils.config.Title;
