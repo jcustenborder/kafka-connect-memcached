@@ -15,7 +15,11 @@
  */
 @Introduction("The memcached plugin is a mechanism for writing data to a memcached cluster.")
 @Title("Memcached")
+@PluginOwner("jcustenborder")
+@PluginName("kafka-connect-memcached")
 package com.github.jcustenborder.kafka.connect.memcached;
 
 import com.github.jcustenborder.kafka.connect.utils.config.Introduction;
+import com.github.jcustenborder.kafka.connect.utils.config.PluginName;
+import com.github.jcustenborder.kafka.connect.utils.config.PluginOwner;
 import com.github.jcustenborder.kafka.connect.utils.config.Title;
