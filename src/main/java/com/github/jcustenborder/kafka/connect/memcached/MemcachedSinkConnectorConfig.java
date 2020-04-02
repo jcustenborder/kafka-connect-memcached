@@ -20,6 +20,7 @@ import com.github.jcustenborder.kafka.connect.utils.config.ConfigUtils;
 import com.github.jcustenborder.kafka.connect.utils.config.ValidEnum;
 import com.github.jcustenborder.kafka.connect.utils.config.ValidHostnameAndPort;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import net.spy.memcached.ConnectionFactoryBuilder;
 import net.spy.memcached.FailureMode;
 import org.apache.kafka.common.config.AbstractConfig;
@@ -37,14 +38,13 @@ import java.util.stream.Collectors;
 class MemcachedSinkConnectorConfig extends AbstractConfig {
 
   public static final String PROTOCOL_CONF = "memcached.protocol";
-  static final String PROTOCOL_DOC = "Specify the protocol to use." +
-      "+==========+================================+\n" +
-      "| Protocol | Description                    |\n" +
-      "+==========+================================+\n" +
-      "| BINARY   | Use the binary protocol.       |\n" +
-      "+----------+--------------------------------+\n" +
-      "| TEXT     | Use the text (ascii) protocol. |\n" +
-      "+----------+--------------------------------+";
+  static final String PROTOCOL_DOC = "Specify the protocol to use. " +
+      ConfigUtils.enumDescription(
+          ImmutableMap.of(
+              ConnectionFactoryBuilder.Protocol.BINARY, "Use the binary protocol.",
+              ConnectionFactoryBuilder.Protocol.TEXT, "Use the text (ascii) protocol."
+          )
+      );
   static final String PROTOCOL_DEFAULT = ConnectionFactoryBuilder.Protocol.BINARY.name();
 
   public static final String HASH_ALGORITHM_CONF = "memcached.hash.algorithm";
@@ -53,16 +53,14 @@ class MemcachedSinkConnectorConfig extends AbstractConfig {
 
   public static final String FAILURE_MODE_CONF = "memcached.failure.mode";
   static final String FAILURE_MODE_DEFAULT = FailureMode.Retry.toString();
-  static final String FAILURE_MODE_DOC = "Set the failure mode.\n" +
-      "+==============+====================================================================+\n" +
-      "| Mode         | Description                                                        |\n" +
-      "+==============+====================================================================+\n" +
-      "| Cancel       | Automatically cancel all operations heading towards a downed node. |\n" +
-      "+--------------+--------------------------------------------------------------------+\n" +
-      "| Redistribute | Move on to functional nodes when nodes fail.                       |\n" +
-      "+--------------+--------------------------------------------------------------------+\n" +
-      "| Retry        | Continue to retry a failing node until it comes back up.           |\n" +
-      "+--------------+--------------------------------------------------------------------+";
+  static final String FAILURE_MODE_DOC = "Set the failure mode. " +
+      ConfigUtils.enumDescription(
+          ImmutableMap.of(
+              FailureMode.Cancel, "Automatically cancel all operations heading towards a downed node.",
+              FailureMode.Redistribute, "Move on to functional nodes when nodes fail.",
+              FailureMode.Retry, "Continue to retry a failing node until it comes back up."
+          )
+      );
 
   public static final String NAGLE_ALGORITHM_ENABLED_CONF = "memcached.nagle.algorithm.enabled";
   static final String NAGLE_ALGORITHM_ENABLED_DOC = "Enables the Nagle algorithm.";
@@ -85,16 +83,15 @@ class MemcachedSinkConnectorConfig extends AbstractConfig {
   public static final int READ_BUFFER_SIZE_BYTES_DEFAULT = -1;
 
   public static final String LOCATOR_TYPE_CONF = "memcached.locator";
-  static final String LOCATOR_TYPE_DOC = "The locator type.\n" +
-      "+============+======================================================+\n" +
-      "| Locator    | Description                                          |\n" +
-      "+============+======================================================+\n" +
-      "| ARRAY_MOD  | Array modulus - the classic node location algorithm. |\n" +
-      "+------------+------------------------------------------------------+\n" +
-      "| CONSISTENT | Consistent hash algorithm.                           |\n" +
-      "+------------+------------------------------------------------------+\n" +
-      "| VBUCKET    | VBucket support.                                     |\n" +
-      "+------------+------------------------------------------------------+";
+  static final String LOCATOR_TYPE_DOC = "The locator type. " +
+      ConfigUtils.enumDescription(
+          ImmutableMap.of(
+              ConnectionFactoryBuilder.Locator.ARRAY_MOD, "The classic node location algorithm.",
+              ConnectionFactoryBuilder.Locator.CONSISTENT, "Consistent hash algorithm.",
+              ConnectionFactoryBuilder.Locator.VBUCKET, "VBucket support."
+
+          )
+      );
   static final String LOCATOR_TYPE_DEFAULT = ConnectionFactoryBuilder.Locator.ARRAY_MOD.name();
 
   public static final String DEFAULT_EXPIRATION_SECS_CONF = "memcached.default.expiration.secs";
@@ -102,7 +99,7 @@ class MemcachedSinkConnectorConfig extends AbstractConfig {
   static final int DEFAULT_EXPIRATION_SECS_DEFAULT = 0;
 
   public static final String HOSTS_CONF = "memcached.hosts";
-  static final String HOSTS_DOC = "Memcached hosts to connnect to.";
+  static final String HOSTS_DOC = "Memcached hosts to connect to.";
   static final List<String> HOSTS_DEFAULT = Arrays.asList("localhost:11211");
 
 
